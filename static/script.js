@@ -73,5 +73,6 @@ function sendData() {
 
 // Инициализация
 createWheel();
-sendData()
+sendData();
 spinBtn.addEventListener('click', spinWheel);
+
