@@ -59,13 +59,18 @@ function spinWheel() {
         
         // Определяем индекс выигравшей секции
         const winningIndex = Math.floor(normalizedAngle / sectionAngle);
-        
+      
+        let value = document.getElementById(winningIndex).value;
+        Telegram.WebApp.sendData(value);
+    
         resultEl.textContent = `🎉 Поздравляем! Вы выиграли: ${sections[winningIndex].text}`;
         console.log(winningIndex)
         spinBtn.disabled = false;
     }, 3100);
+ 
 }
 
 // Инициализация
 createWheel();
+
 spinBtn.addEventListener('click', spinWheel);
