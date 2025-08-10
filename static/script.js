@@ -67,12 +67,12 @@ function spinWheel() {
  
 }
 function sendData() {
-      let value = document.getElementById("myInput").value;
-      Telegram.WebApp.sendData(value);
+  let value = document.getElementById(winningIndex).value;
+  Telegram.WebApp.sendData(value);
 }
-
 // Инициализация
 createWheel();
-sendData();
-spinBtn.addEventListener('click', spinWheel);
+
+spinBtn.addEventListener('click', spinWheel, sendData);
+
 
