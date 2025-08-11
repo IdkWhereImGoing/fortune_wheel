@@ -71,30 +71,39 @@ function spinWheel() {
     
     // Определяем выигрыш после остановки колеса
     setTimeout(() => {
-        // Исправленная логика определения выигрышного сектора
-        // Учитываем, что указатель находится сверху (0 градусов)
-        let normalizedAngle = spinAngle % 360;
+        // Получаем финальный угол поворота колеса
+        const finalAngle = spinAngle % 360;
         
-        // Корректируем угол для правильного определения сектора
-        // Поскольку колесо вращается по часовой стрелке, а указатель сверху
-        normalizedAngle = (360 - normalizedAngle) % 360;
+        // Поскольку указатель находится сверху (12 часов), а колесо вращается по часовой стрелке,
+        // нужно инвертировать угол для правильного определения сектора
+        const adjustedAngle = (360 - finalAngle) % 360;
         
-        // Определяем индекс выигравшей секции
-        let winningIndex = Math.floor(normalizedAngle / sectionAngle);
+        // Вычисляем индекс выигрышного сектора
+        let winningIndex = Math.floor(adjustedAngle / sectionAngle);
         
-        // Убеждаемся, что индекс в правильном диапазоне
-        winningIndex = winningIndex % sections.length;
+        // Дополнительная проверка и корректировка индекса
+        if (winningIndex >= sections.length) {
+            winningIndex = sections.length - 1;
+        } else if (winningIndex < 0) {
+            winningIndex = 0;
+        }
         
-        const winningText = sections[winningIndex].text;
-        
-        resultEl.textContent = `🎉 Поздравляем! Вы выиграли: ${winningText}`;
-        console.log('Угол поворота:', spinAngle);
-        console.log('Нормализованный угол:', normalizedAngle);
-        console.log('Выигрышный индекс:', winningIndex);
-        console.log('Выигрышный приз:', winningText);
-        
-        // Отправляем данные в бота
-        sendDataToBot(winningIndex, winningText);
+        // Проверяем, что индекс корректный перед обращением к массиву
+        if (winningIndex >= 0 && winningIndex < sections.length) {
+            const winningText = sections[winningIndex].text;
+            
+            resultEl.textContent = `🎉 Поздравляем! Вы выиграли: ${winningText}`;
+            console.log('Финальный угол:', finalAngle);
+            console.log('Скорректированный угол:', adjustedAngle);
+            console.log('Выигрышный индекс:', winningIndex);
+            console.log('Выигрышный приз:', winningText);
+            
+            // Отправляем данные в бота
+            sendDataToBot(winningIndex, winningText);
+        } else {
+            console.error('Ошибка: некорректный индекс', winningIndex);
+            resultEl.textContent = 'Ошибка определения результата';
+        }
         
         spinBtn.disabled = false;
     }, 3100);
