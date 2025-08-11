@@ -41,6 +41,23 @@ function createWheel() {
     wheel.style.background = gradientString;
 }
 
+// Функция отправки данных в Telegram бота
+function sendDataToBot(winningIndex, winningText) {
+    const resultData = {
+        winningIndex: winningIndex,
+        winningText: winningText,
+        timestamp: new Date().toISOString()
+    };
+    
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.sendData(JSON.stringify(resultData));
+        console.log('Данные отправлены в бота:', resultData);
+    } else {
+        console.error('Telegram WebApp API недоступен');
+        console.log('Результат (без отправки):', resultData);
+    }
+}
+
 // Логика вращения
 function spinWheel() {
     spinBtn.disabled = true;
@@ -54,26 +71,37 @@ function spinWheel() {
     
     // Определяем выигрыш после остановки колеса
     setTimeout(() => {
-        // Нормализуем угол к диапазону 0-360, учитывая, что колесо крутится вправо
-        const normalizedAngle = (360 - (spinAngle % 360));
+        // Исправленная логика определения выигрышного сектора
+        // Учитываем, что указатель находится сверху (0 градусов)
+        let normalizedAngle = spinAngle % 360;
+        
+        // Корректируем угол для правильного определения сектора
+        // Поскольку колесо вращается по часовой стрелке, а указатель сверху
+        normalizedAngle = (360 - normalizedAngle) % 360;
         
         // Определяем индекс выигравшей секции
-        const winningIndex = Math.floor(normalizedAngle / sectionAngle);
-    
-        resultEl.textContent = `🎉 Поздравляем! Вы выиграли: ${sections[winningIndex].text}`;
-        console.log(winningIndex)
+        let winningIndex = Math.floor(normalizedAngle / sectionAngle);
+        
+        // Убеждаемся, что индекс в правильном диапазоне
+        winningIndex = winningIndex % sections.length;
+        
+        const winningText = sections[winningIndex].text;
+        
+        resultEl.textContent = `🎉 Поздравляем! Вы выиграли: ${winningText}`;
+        console.log('Угол поворота:', spinAngle);
+        console.log('Нормализованный угол:', normalizedAngle);
+        console.log('Выигрышный индекс:', winningIndex);
+        console.log('Выигрышный приз:', winningText);
+        
+        // Отправляем данные в бота
+        sendDataToBot(winningIndex, winningText);
+        
         spinBtn.disabled = false;
     }, 3100);
- 
 }
-function sendData() {
-  let value = document.getElementById(winningIndex).value;
-  Telegram.WebApp.sendData(JSON.stringify(value));
-}
+
 // Инициализация
 createWheel();
 
-spinBtn.addEventListener('click', spinWheel, sendData);
-
-
-
+// Правильная регистрация обработчика события
+spinBtn.addEventListener('click', spinWheel);
